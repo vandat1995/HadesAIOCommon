@@ -1,4 +1,5 @@
 ﻿using HadesAIOCommon.Http;
+using Leaf.xNet;
 using Newtonsoft.Json.Linq;
 using OtpNet;
 using System;
@@ -33,6 +34,14 @@ namespace HadesAIOCommon
         {
             return rand.Next(min, max);
         }
+        public static bool SetThreadPool(int n)
+        {
+            bool s1 = ThreadPool.SetMaxThreads(1600, 3200);
+            int minT = n + Environment.ProcessorCount;
+            bool s2 = ThreadPool.SetMinThreads(minT, 3200);
+            return s1 && s2;
+        }
+
         public static Bitmap Base64ToBitmap(string base64)
         {
             byte[] bytes = Convert.FromBase64String(base64);
@@ -105,6 +114,33 @@ namespace HadesAIOCommon
             return list[rand.Next(list.Count)];
         }
 
+        public static bool IsNumeric(string input)
+        {
+            return Regex.IsMatch(input, "^\\d+$");
+        }
+        public static string EscapeString(string input)
+        {
+            return Regex.Replace(StripUnicode(input), "[^a-zA-Z0-9 ]", "");
+        }
+        public static string StripUnicode(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return string.Empty;
+            }
+            input = Regex.Replace(input, "(á|à|ả|ã|ạ|ă|ắ|ằ|ẳ|ẵ|ặ|â|ấ|ầ|ẩ|ẫ|ậ|Á|À|Ả|Ã|Ạ|Ă|Ắ|Ằ|Ẳ|Ẵ|Ặ|Â|Ấ|Ầ|Ẩ|Ẫ|Ậ)", "a");
+            input = Regex.Replace(input, "(đ|Đ)", "d");
+            input = Regex.Replace(input, "(é|è|ẻ|ẽ|ẹ|ê|ế|ề|ể|ễ|ệ|É|È|Ẻ|Ẽ|Ẹ|Ê|Ế|Ề|Ể|Ễ|Ệ)", "e");
+            input = Regex.Replace(input, "(í|ì|ỉ|ĩ|ị|Í|Ì|Ỉ|Ĩ|Ị)", "i");
+            input = Regex.Replace(input, "(ó|ò|ỏ|õ|ọ|ô|ố|ồ|ổ|ỗ|ộ|ơ|ớ|ờ|ở|ỡ|ợ|Ó|Ò|Ỏ|Õ|Ọ|Ô|Ố|Ồ|Ổ|Ỗ|Ộ|Ơ|Ớ|Ờ|Ở|Ỡ|Ợ|ö)", "o");
+            input = Regex.Replace(input, "(ú|ù|ủ|ũ|ụ|ư|ứ|ừ|ử|ữ|ự|Ú|Ù|Ủ|Ũ|Ụ|Ư|Ứ|Ừ|Ử|Ữ|Ự|ü)", "u");
+            input = Regex.Replace(input, "(ý|ỳ|ỷ|ỹ|ỵ|Ý|Ỳ|Ỷ|Ỹ|Ỵ)", "y");
+            input = Regex.Replace(input, "''ss|'s|'ss|''s|'|''|'x|'xx|''x|''xx", "");
+            input = Regex.Replace(input, "\\u0300|\\u0301|\\u0303|\\u0309|\\u0323", "");
+            input = Regex.Replace(input, "\\u02C6|\\u0306|\\u031B", "");
+            input = Regex.Replace(input, "ç", "c");
+            return input;
+        }
         public static string GetValueByRegex(string text, string pattern, int groupIndex = 1)
         {
             Match match = Regex.Match(text, pattern);
@@ -119,6 +155,27 @@ namespace HadesAIOCommon
             }
 
             return matches.Cast<Match>().Select(m => m.Groups[groupIndex].Value);
+        }
+
+        public static bool IsLiveProxy(string proxy)
+        {
+            try
+            {
+                string[] temp = proxy.Split(':', '|').Select(x => x.Trim()).ToArray();
+                ProxyClient proxyClient = HttpProxyClient.Parse($"{temp[0]}:{temp[1]}");
+                if (temp.Length > 3)
+                {
+                    proxyClient.Username = temp[2];
+                    proxyClient.Password = temp[3];
+                }
+                var headers = new EzHttpHeader().NormalHeader().Build;
+                string json = EzHttpRequest.Instance.Get("https://www.facebook.com/", proxyClient, false, 10000, headers);
+                return true;
+            }
+            catch (HttpException)
+            {
+            }
+            return false;
         }
     }
 }

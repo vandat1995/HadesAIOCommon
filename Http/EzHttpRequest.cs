@@ -53,7 +53,7 @@ namespace HadesAIOCommon.Http
             }
             return request.Get(url).ToString();
         }
-        public string Get(string url, ProxyClient proxy, bool ignoreError = false, int timeout = 0,
+        public string Get(string url, ProxyClient? proxy, bool ignoreError = false, int timeout = 0,
             Dictionary<string, string>? headers = null, string ua = "", bool redirect = false)
         {
             using var request = new HttpRequest();

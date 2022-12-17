@@ -73,7 +73,6 @@ namespace HadesAIOCommon.Concurrent
                 completedTasks = new ConcurrentQueue<HadesTask>();
             }
         }
-
         public void Abort()
         {
         }
@@ -118,7 +117,6 @@ namespace HadesAIOCommon.Concurrent
                 //Log("Finish monitor DaExecutor");
             });
         }
-
         private static void Log(string msg)
         {
             Console.WriteLine($"{DateTime.Now:HH:mm:ss.fff} - Thread-{Thread.CurrentThread.ManagedThreadId} - {msg}");
