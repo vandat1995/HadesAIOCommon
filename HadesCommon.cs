@@ -69,13 +69,13 @@ namespace HadesAIOCommon
         public static string Get2FACode(string salt)
         {
             salt = salt.Replace(" ", "");
-            var topt = new Totp(Base32Encoding.ToBytes(salt));
-            if (topt.RemainingSeconds() < 2)
+            var totp = new Totp(Base32Encoding.ToBytes(salt));
+            if (totp.RemainingSeconds() < 2)
             {
                 Thread.Sleep(2000);
                 return Get2FACode(salt);
             }
-            return topt.ComputeTotp();
+            return totp.ComputeTotp();
         }
 
         public static string GetRandomFullName()
