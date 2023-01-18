@@ -12,6 +12,8 @@ namespace HadesAIOCommon.Http
         {
             public const string FORM_URLENCODED = "application/x-www-form-urlencoded";
             public const string FORM_URLENCODED_UTF8 = "application/x-www-form-urlencoded; charset=UTF-8";
+            public const string CONTENT_TYPE_JSON = "application/json";
+            public const string CONTENT_TYPE_JSON_UTF8 = "application/json; charset=UTF-8";
         }
 
         private const int DEFAULT_TIMEOUT = 60000;
