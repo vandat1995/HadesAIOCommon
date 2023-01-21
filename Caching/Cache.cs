@@ -55,6 +55,10 @@ namespace HadesAIOCommon.Caching
                 }
                 return default;
             }
+            if (typeof(T).Equals(typeof(bool)))
+            {
+                val = val.ToLower();
+            }
             return JSON.Parse<T>(val);
         }
 
