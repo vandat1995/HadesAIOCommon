@@ -20,6 +20,7 @@ namespace HadesAIOCommon
         private const string ALPHABET_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         private const string NUMBERS = "0123456789";
 
+        private static readonly object MUTEX = new();
         private static readonly Random rand = new();
 
         public static void Delay(int seconds)
@@ -41,6 +42,7 @@ namespace HadesAIOCommon
             bool s2 = ThreadPool.SetMinThreads(minT, 3200);
             return s1 && s2;
         }
+        
 
         public static Bitmap Base64ToBitmap(string base64)
         {
@@ -113,6 +115,19 @@ namespace HadesAIOCommon
             }
             return list[rand.Next(list.Count)];
         }
+        public static T? GetRandomInListThenRemove<T>(List<T> list)
+        {
+            lock (MUTEX)
+            {
+                if (list == null || list.Count == 0)
+                {
+                    return default;
+                }
+                T item = list[rand.Next(list.Count)];
+                list.Remove(item);
+                return item;
+            }
+        }
 
         public static bool IsNumeric(string input)
         {
@@ -176,6 +191,21 @@ namespace HadesAIOCommon
             {
             }
             return false;
+        }
+
+        public static void DeleteLocalFile(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return;
+            }
+            try
+            {
+                File.Delete(path);
+            }
+            catch
+            {
+            }
         }
     }
 }
