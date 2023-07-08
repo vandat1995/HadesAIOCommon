@@ -42,18 +42,14 @@ namespace HadesAIOCommon.Http
             }
             return request.Get(url).ToString();
         }
-        public string Get(string url, string proxy)
+        public string Get(string url, string? proxy, Dictionary<string, string>? headers, string ua = "")
         {
-            using var request = new HttpRequest();
-            request.IgnoreProtocolErrors = true;
-            request.AllowAutoRedirect = true;
-            request.ConnectTimeout = DEFAULT_TIMEOUT;
-            request.UserAgent = Constant.DEFAULT_CHROME_USER_AGENT;
+            ProxyClient? proxyClient = null;
             if (!string.IsNullOrWhiteSpace(proxy))
             {
-                request.Proxy = HttpProxyClient.Parse(proxy);
+                proxyClient = HttpProxyClient.Parse(proxy);
             }
-            return request.Get(url).ToString();
+            return Get(url, proxyClient, false, 0, headers, ua, true);
         }
         public string Get(string url, ProxyClient? proxy, bool ignoreError = false, int timeout = 0,
             Dictionary<string, string>? headers = null, string ua = "", bool redirect = false)

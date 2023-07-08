@@ -9,6 +9,7 @@ namespace HadesAIOCommon.Concurrent
     public class HadesExecutor : IExecutor
     {
         public int MaxParallelism { get; set; }
+        public int DelayTask { get; set; } = 100;
         public bool IsCompleted => finished;
 
         private readonly object MUTEX = new();
@@ -51,6 +52,7 @@ namespace HadesAIOCommon.Concurrent
                 {
                     HadesTask.Task.Start();
                     HadesTask.Task.ContinueWith(taskResult => HadesTask.CompletedTaskCallback?.Invoke(HadesTask));
+                    Thread.Sleep(DelayTask);
                 }
 
                 while (runningTasks.Count == MaxParallelism)
