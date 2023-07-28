@@ -42,7 +42,7 @@ namespace HadesAIOCommon
             bool s2 = ThreadPool.SetMinThreads(minT, 3200);
             return s1 && s2;
         }
-        
+
 
         public static Bitmap Base64ToBitmap(string base64)
         {
@@ -72,9 +72,9 @@ namespace HadesAIOCommon
         {
             salt = salt.Replace(" ", "");
             var totp = new Totp(Base32Encoding.ToBytes(salt));
-            if (totp.RemainingSeconds() < 2)
+            if (totp.RemainingSeconds() < 5)
             {
-                Thread.Sleep(2000);
+                Thread.Sleep(5000);
                 return Get2FACode(salt);
             }
             return totp.ComputeTotp();
@@ -123,12 +123,19 @@ namespace HadesAIOCommon
                 {
                     return default;
                 }
-                T item = list[rand.Next(list.Count)];
-                list.Remove(item);
+                var i = rand.Next(list.Count);
+                T item = list[i];
+                list.RemoveAt(i);
                 return item;
             }
         }
 
+        public static string HtmlDecode(string html)
+        {
+            return string.IsNullOrWhiteSpace(html)
+                ? string.Empty
+                : System.Web.HttpUtility.HtmlDecode(html);
+        }
         public static bool IsNumeric(string input)
         {
             return Regex.IsMatch(input, "^\\d+$");

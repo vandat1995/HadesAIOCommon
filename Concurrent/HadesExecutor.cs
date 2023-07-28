@@ -9,8 +9,9 @@ namespace HadesAIOCommon.Concurrent
     public class HadesExecutor : IExecutor
     {
         public int MaxParallelism { get; set; }
-        public int DelayTask { get; set; } = 100;
+        public int DelayTask { get; set; } = 10;
         public bool IsCompleted => finished;
+        private bool isStopped = false;
 
         private readonly object MUTEX = new();
         private readonly Queue<HadesTask> tasksQueue = new();
@@ -37,17 +38,19 @@ namespace HadesAIOCommon.Concurrent
 
         public void Run()
         {
+            if (isStopped)
+            {
+                return;
+            }
             finished = false;
             StartMonitor();
             while (tasksQueue.Count > 0)
             {
                 var HadesTask = tasksQueue.Dequeue();
-
                 lock (MUTEX)
                 {
                     runningTasks.Add(HadesTask);
                 }
-
                 if (HadesTask.Task != null)
                 {
                     HadesTask.Task.Start();
@@ -60,7 +63,6 @@ namespace HadesAIOCommon.Concurrent
                     Thread.Sleep(timeWait);
                 }
             }
-
             while (!finished)
             {
                 Thread.Sleep(timeWait);
@@ -70,9 +72,10 @@ namespace HadesAIOCommon.Concurrent
         {
             lock (MUTEX)
             {
+                isStopped = true;
                 tasksQueue.Clear();
-                runningTasks.Clear();
-                completedTasks = new ConcurrentQueue<HadesTask>();
+                //runningTasks.Clear();
+                //completedTasks = new ConcurrentQueue<HadesTask>();
             }
         }
         public void Abort()
