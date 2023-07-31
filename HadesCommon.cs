@@ -67,7 +67,6 @@ namespace HadesAIOCommon
             {
             }
         }
-
         public static string Get2FACode(string salt)
         {
             salt = salt.Replace(" ", "");
@@ -199,7 +198,6 @@ namespace HadesAIOCommon
             }
             return false;
         }
-
         public static void DeleteLocalFile(string path)
         {
             if (string.IsNullOrWhiteSpace(path))
@@ -214,5 +212,11 @@ namespace HadesAIOCommon
             {
             }
         }
+        public static IEnumerable<string> GetFilesInDirectory(string dir)
+        {
+            return Directory.GetFiles(dir)
+                .Where(x => !Path.GetFileName(x).StartsWith("."));
+        }
+
     }
 }

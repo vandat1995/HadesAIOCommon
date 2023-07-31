@@ -13,7 +13,7 @@ namespace HadesAIOCommon.OCR
         private const EngineMode engineMode = EngineMode.Default;
         private const PageIteratorLevel pageIteratorLevel = PageIteratorLevel.Word;
 
-        private const int MAX_CONCURRENT = 8;
+        private const int MAX_CONCURRENT = 16;
         private static readonly Random rand = new();
         private static readonly List<object> mutexs = Enumerable.Repeat(new object(), MAX_CONCURRENT).ToList();
 

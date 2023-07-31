@@ -15,8 +15,10 @@ namespace HadesAIOCommon.Concurrent
 
         private readonly object MUTEX = new();
         private readonly Queue<HadesTask> tasksQueue = new();
-        private readonly HashSet<HadesTask> runningTasks = new();
-        private ConcurrentQueue<HadesTask> completedTasks = new();
+        //private readonly HashSet<HadesTask> runningTasks = new();
+        //private ConcurrentQueue<HadesTask> completedTasks = new();
+        private readonly HashSet<string> runningTasks = new();
+        private readonly ConcurrentQueue<string> completedTasks = new();
 
         private readonly int timeWait;
         private bool finished;
@@ -43,31 +45,35 @@ namespace HadesAIOCommon.Concurrent
                 return;
             }
             finished = false;
-            StartMonitor();
-            while (tasksQueue.Count > 0)
+            StartMonitoring();
+            Task.Run(async () =>
             {
-                var HadesTask = tasksQueue.Dequeue();
-                lock (MUTEX)
+                while (tasksQueue.Count > 0)
                 {
-                    runningTasks.Add(HadesTask);
-                }
-                if (HadesTask.Task != null)
-                {
-                    HadesTask.Task.Start();
-                    HadesTask.Task.ContinueWith(taskResult => HadesTask.CompletedTaskCallback?.Invoke(HadesTask));
-                    Thread.Sleep(DelayTask);
-                }
+                    var hadesTask = tasksQueue.Dequeue();
+                    lock (MUTEX)
+                    {
+                        runningTasks.Add(hadesTask.Id);
+                    }
 
-                while (runningTasks.Count == MaxParallelism)
-                {
-                    Thread.Sleep(timeWait);
+                    if (hadesTask.Task != null)
+                    {
+                        hadesTask.Task.Start();
+                        await Task.Delay(timeWait);
+                    }
+
+                    while (runningTasks.Count == MaxParallelism)
+                    {
+                        await Task.Delay(timeWait);
+                    }
                 }
-            }
+            });
             while (!finished)
             {
                 Thread.Sleep(timeWait);
             }
         }
+
         public void Stop()
         {
             lock (MUTEX)
@@ -84,11 +90,10 @@ namespace HadesAIOCommon.Concurrent
 
         public void SubmitTask(Action action)
         {
-            HadesTask HadesTask = new(this)
-            {
-                Task = new Task(action)
-            };
-            SubmitTask(HadesTask);
+            var t = new HadesTask(this);
+            action += () => t.CompletedTaskCallback?.Invoke(t);
+            t.Task = new(action);
+            SubmitTask(t);
         }
         public void SubmitTask(HadesTask hadesTask)
         {
@@ -97,29 +102,31 @@ namespace HadesAIOCommon.Concurrent
 
         public void MakeCompleteTask(HadesTask hadesTask)
         {
-            completedTasks.Enqueue(hadesTask);
+            hadesTask.IsDone = true;
+            completedTasks.Enqueue(hadesTask.Id);
         }
 
 
-        private void StartMonitor()
+        private void StartMonitoring()
         {
             Task.Run(async () =>
             {
-                //Log("Begin monitor DaExecutor");
                 while (tasksQueue.Count > 0 || runningTasks.Count > 0 || completedTasks.Count > 0)
                 {
                     while (completedTasks.Count > 0)
                     {
-                        bool success = completedTasks.TryDequeue(out HadesTask HadesTask);
+                        var success = completedTasks.TryDequeue(out string hadesTask);
                         lock (MUTEX)
                         {
-                            runningTasks.Remove(HadesTask);
+                            var isSuccess = runningTasks.Remove(hadesTask);
+                            if (!isSuccess)
+                            {
+                            }
                         }
                     }
                     await Task.Delay(timeWait);
                 }
                 finished = true;
-                //Log("Finish monitor DaExecutor");
             });
         }
         private static void Log(string msg)
