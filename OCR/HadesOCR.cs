@@ -13,7 +13,7 @@ namespace HadesAIOCommon.OCR
         private const EngineMode engineMode = EngineMode.Default;
         private const PageIteratorLevel pageIteratorLevel = PageIteratorLevel.Word;
 
-        private const int MAX_CONCURRENT = 16;
+        private const int MAX_CONCURRENT = 128;
         private static readonly Random rand = new();
         private static readonly List<object> mutexs = Enumerable.Repeat(new object(), MAX_CONCURRENT).ToList();
 
@@ -61,26 +61,27 @@ namespace HadesAIOCommon.OCR
         public static List<BoudingWord> GetBoudingWords(Bitmap bitmap, out string pageText)
         {
             List<BoudingWord> results = new();
+            
+            //var locker = mutexs[rand.Next(mutexs.Count)];
+            //lock (locker)
+            //{
+            //}
 
-            var locker = mutexs[rand.Next(mutexs.Count)];
             BitmapToGrayScale(bitmap);
-            lock (locker)
+            using var engine = new TesseractEngine(TESSDATA, LANGUAGE, engineMode);
+            using var img = PixConverter.ToPix(bitmap);
+            using var page = engine.Process(img);
+            pageText = page.GetText();
+            var iter = page.GetIterator();
+            iter.Begin();
+            do
             {
-                using var engine = new TesseractEngine(TESSDATA, LANGUAGE, engineMode);
-                using var img = PixConverter.ToPix(bitmap);
-                using var page = engine.Process(img);
-                pageText = page.GetText();
-                var iter = page.GetIterator();
-                iter.Begin();
-                do
+                if (iter.TryGetBoundingBox(pageIteratorLevel, out var rect))
                 {
-                    if (iter.TryGetBoundingBox(pageIteratorLevel, out var rect))
-                    {
-                        var curText = iter.GetText(pageIteratorLevel);
-                        results.Add(new BoudingWord(curText, rect));
-                    }
-                } while (iter.Next(pageIteratorLevel));
-            }
+                    var curText = iter.GetText(pageIteratorLevel);
+                    results.Add(new BoudingWord(curText, rect));
+                }
+            } while (iter.Next(pageIteratorLevel));
 
             return results;
         }
@@ -88,29 +89,27 @@ namespace HadesAIOCommon.OCR
         {
             List<BoudingWord> results = new();
 
-            var locker = mutexs[rand.Next(mutexs.Count)];
+            //var locker = mutexs[rand.Next(mutexs.Count)];
+            //lock (locker)
+            //{ 
+            //}
 
-            using (var bitmap = new Bitmap(imgPath))
+            using var bitmap = new Bitmap(imgPath);
+            BitmapToGrayScale(bitmap);
+            using var engine = new TesseractEngine(TESSDATA, LANGUAGE, engineMode);
+            using var img = PixConverter.ToPix(bitmap);
+            using var page = engine.Process(img);
+            pageText = page.GetText();
+            var iter = page.GetIterator();
+            iter.Begin();
+            do
             {
-                BitmapToGrayScale(bitmap);
-                lock (locker)
+                if (iter.TryGetBoundingBox(pageIteratorLevel, out var rect))
                 {
-                    using var engine = new TesseractEngine(TESSDATA, LANGUAGE, engineMode);
-                    using var img = PixConverter.ToPix(bitmap);
-                    using var page = engine.Process(img);
-                    pageText = page.GetText();
-                    var iter = page.GetIterator();
-                    iter.Begin();
-                    do
-                    {
-                        if (iter.TryGetBoundingBox(pageIteratorLevel, out var rect))
-                        {
-                            var curText = iter.GetText(pageIteratorLevel);
-                            results.Add(new BoudingWord(curText, rect));
-                        }
-                    } while (iter.Next(pageIteratorLevel));
+                    var curText = iter.GetText(pageIteratorLevel);
+                    results.Add(new BoudingWord(curText, rect));
                 }
-            }
+            } while (iter.Next(pageIteratorLevel));
 
             return results;
         }

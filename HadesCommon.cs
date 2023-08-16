@@ -129,6 +129,14 @@ namespace HadesAIOCommon
             }
         }
 
+        public static string UrlEncode(string str)
+        {
+            return Uri.EscapeDataString(str);
+        }
+        public static string UrlDecode(string str)
+        {
+            return Uri.UnescapeDataString(str);
+        }
         public static string HtmlDecode(string html)
         {
             return string.IsNullOrWhiteSpace(html)

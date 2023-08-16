@@ -7,6 +7,12 @@ namespace HadesAIOCommon.Http
     public class EzHttpHeader
     {
         private readonly Dictionary<string, string> headers = new Dictionary<string, string>();
+
+        public EzHttpHeader()
+        {
+            Add("Upgrade-Insecure-Requests", "1");
+        }
+
         public EzHttpHeader UserAgent(string userAgent)
         {
             headers["user-agent"] = userAgent;

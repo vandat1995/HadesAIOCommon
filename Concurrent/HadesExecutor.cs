@@ -16,7 +16,7 @@ namespace HadesAIOCommon.Concurrent
         private readonly object MUTEX = new();
         private readonly Queue<HadesTask> tasksQueue = new();
         //private readonly HashSet<HadesTask> runningTasks = new();
-        //private ConcurrentQueue<HadesTask> completedTasks = new();
+        //private readonly ConcurrentQueue<HadesTask> completedTasks = new();
         private readonly HashSet<string> runningTasks = new();
         private readonly ConcurrentQueue<string> completedTasks = new();
 
@@ -25,7 +25,7 @@ namespace HadesAIOCommon.Concurrent
 
         public HadesExecutor()
         {
-            timeWait = 10;
+            timeWait = 20;
             MaxParallelism = Environment.ProcessorCount - 1;
         }
         public HadesExecutor(int maxParallelism) : this()
@@ -80,8 +80,6 @@ namespace HadesAIOCommon.Concurrent
             {
                 isStopped = true;
                 tasksQueue.Clear();
-                //runningTasks.Clear();
-                //completedTasks = new ConcurrentQueue<HadesTask>();
             }
         }
         public void Abort()
@@ -95,7 +93,7 @@ namespace HadesAIOCommon.Concurrent
             t.Task = new(action);
             SubmitTask(t);
         }
-        public void SubmitTask(HadesTask hadesTask)
+        private void SubmitTask(HadesTask hadesTask)
         {
             tasksQueue.Enqueue(hadesTask);
         }
@@ -105,7 +103,6 @@ namespace HadesAIOCommon.Concurrent
             hadesTask.IsDone = true;
             completedTasks.Enqueue(hadesTask.Id);
         }
-
 
         private void StartMonitoring()
         {

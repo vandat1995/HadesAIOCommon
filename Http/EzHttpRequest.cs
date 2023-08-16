@@ -17,7 +17,6 @@ namespace HadesAIOCommon.Http
         }
 
         private const int DEFAULT_TIMEOUT = 60000;
-
         private EzHttpRequest() { }
         private static readonly EzHttpRequest instance = new();
         public static EzHttpRequest Instance => instance;
@@ -28,7 +27,7 @@ namespace HadesAIOCommon.Http
             request.IgnoreProtocolErrors = true;
             request.AllowAutoRedirect = true;
             request.ConnectTimeout = DEFAULT_TIMEOUT;
-            request.UserAgent = Constant.DEFAULT_CHROME_USER_AGENT;
+            request.UserAgent = HadesConstant.DEFAULT_CHROME_USER_AGENT;
             if (timeout != 0)
             {
                 request.ConnectTimeout = timeout;
@@ -55,7 +54,7 @@ namespace HadesAIOCommon.Http
             Dictionary<string, string>? headers = null, string ua = "", bool redirect = false)
         {
             using var request = new HttpRequest();
-            request.UserAgent = !string.IsNullOrWhiteSpace(ua) ? ua : Constant.DEFAULT_CHROME_USER_AGENT;
+            request.UserAgent = !string.IsNullOrWhiteSpace(ua) ? ua : HadesConstant.DEFAULT_CHROME_USER_AGENT;
             request.ConnectTimeout = timeout != 0 ? timeout : DEFAULT_TIMEOUT;
             request.AllowAutoRedirect = redirect;
             request.IgnoreProtocolErrors = ignoreError;
@@ -71,7 +70,8 @@ namespace HadesAIOCommon.Http
             {
                 request.Proxy = proxy;
             }
-            return request.Get(url).ToString();
+            var response = request.Get(url);
+            return response.ToString();
         }
 
         public CookieStorage GetCookie(string url, ProxyClient? proxy = null)
@@ -80,7 +80,7 @@ namespace HadesAIOCommon.Http
             request.IgnoreProtocolErrors = true;
             request.AllowAutoRedirect = true;
             request.ConnectTimeout = DEFAULT_TIMEOUT;
-            request.UserAgent = Constant.DEFAULT_CHROME_USER_AGENT;
+            request.UserAgent = HadesConstant.DEFAULT_CHROME_USER_AGENT;
             if (proxy != null)
             {
                 request.Proxy = proxy;
@@ -94,7 +94,7 @@ namespace HadesAIOCommon.Http
             using var request = new HttpRequest();
             request.AllowAutoRedirect = true;
             request.ConnectTimeout = DEFAULT_TIMEOUT;
-            request.UserAgent = Constant.DEFAULT_CHROME_USER_AGENT;
+            request.UserAgent = HadesConstant.DEFAULT_CHROME_USER_AGENT;
             return request.Post(URL).ToString();
         }
         public string Post(string url, string body, string contentType,
@@ -105,7 +105,7 @@ namespace HadesAIOCommon.Http
             request.IgnoreProtocolErrors = ignoreError;
             request.AllowAutoRedirect = true;
             request.ConnectTimeout = DEFAULT_TIMEOUT;
-            request.UserAgent = ua != string.Empty ? ua : Constant.DEFAULT_CHROME_USER_AGENT;
+            request.UserAgent = ua != string.Empty ? ua : HadesConstant.DEFAULT_CHROME_USER_AGENT;
             if (proxy != null)
             {
                 request.Proxy = proxy;
@@ -126,7 +126,7 @@ namespace HadesAIOCommon.Http
             using var request = new HttpRequest();
             request.IgnoreProtocolErrors = true;
             request.AllowAutoRedirect = true;
-            request.UserAgent = ua != string.Empty ? ua : Constant.DEFAULT_CHROME_USER_AGENT;
+            request.UserAgent = ua != string.Empty ? ua : HadesConstant.DEFAULT_CHROME_USER_AGENT;
             if (proxy != null)
             {
                 request.Proxy = proxy;
@@ -151,8 +151,29 @@ namespace HadesAIOCommon.Http
             using var request = new HttpRequest();
             request.IgnoreProtocolErrors = true;
             request.ConnectTimeout = 1000 * 60 * 5;
-            request.UserAgent = ua != string.Empty ? ua : Constant.DEFAULT_CHROME_USER_AGENT;
+            request.UserAgent = ua != string.Empty ? ua : HadesConstant.DEFAULT_CHROME_USER_AGENT;
             request.Get(url).ToFile(localPath);
         }
+
+        public static ProxyClient? ParseProxyClient(string? proxy)
+        {
+            if (string.IsNullOrWhiteSpace(proxy))
+            {
+                return null;
+            }
+            ProxyClient? proxyClient = null;
+            var temp = proxy.Split('|', ':');
+            if (temp.Length >= 2)
+            {
+                proxyClient = HttpProxyClient.Parse($"{temp[0]}:{temp[1]}");
+                if (temp.Length >= 4)
+                {
+                    proxyClient.Username = temp[2];
+                    proxyClient.Password = temp[3];
+                }
+            }
+            return proxyClient;
+        }
+
     }
 }

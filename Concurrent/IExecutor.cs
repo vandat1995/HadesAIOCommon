@@ -11,7 +11,6 @@ namespace HadesAIOCommon.Concurrent
         void Stop();
         void Abort();
         void SubmitTask(Action action);
-        void SubmitTask(HadesTask task);
         void MakeCompleteTask(HadesTask task);
     }
 }
