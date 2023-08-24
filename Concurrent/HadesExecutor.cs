@@ -11,14 +11,13 @@ namespace HadesAIOCommon.Concurrent
         public int MaxParallelism { get; set; }
         public int DelayTask { get; set; } = 10;
         public bool IsCompleted => finished;
-        private bool isStopped = false;
 
-        private readonly object MUTEX = new();
+        private readonly object mutex = new();
         private readonly Queue<HadesTask> tasksQueue = new();
-        //private readonly HashSet<HadesTask> runningTasks = new();
-        //private readonly ConcurrentQueue<HadesTask> completedTasks = new();
-        private readonly HashSet<string> runningTasks = new();
-        private readonly ConcurrentQueue<string> completedTasks = new();
+        private readonly HashSet<HadesTask> runningTasks = new();
+        private readonly ConcurrentQueue<HadesTask> completedTasks = new();
+        //private readonly HashSet<string> runningTasks = new();
+        //private readonly ConcurrentQueue<string> completedTasks = new();
 
         private readonly int timeWait;
         private bool finished;
@@ -40,10 +39,6 @@ namespace HadesAIOCommon.Concurrent
 
         public void Run()
         {
-            if (isStopped)
-            {
-                return;
-            }
             finished = false;
             StartMonitoring();
             Task.Run(async () =>
@@ -51,14 +46,15 @@ namespace HadesAIOCommon.Concurrent
                 while (tasksQueue.Count > 0)
                 {
                     var hadesTask = tasksQueue.Dequeue();
-                    lock (MUTEX)
+                    lock (mutex)
                     {
-                        runningTasks.Add(hadesTask.Id);
+                        runningTasks.Add(hadesTask);
                     }
 
                     if (hadesTask.Task != null)
                     {
                         hadesTask.Task.Start();
+                        //_ = hadesTask.Task.ContinueWith(_ => hadesTask.CompletedTaskCallback?.Invoke(hadesTask));
                         await Task.Delay(timeWait);
                     }
 
@@ -68,6 +64,7 @@ namespace HadesAIOCommon.Concurrent
                     }
                 }
             });
+
             while (!finished)
             {
                 Thread.Sleep(timeWait);
@@ -76,9 +73,8 @@ namespace HadesAIOCommon.Concurrent
 
         public void Stop()
         {
-            lock (MUTEX)
+            lock (mutex)
             {
-                isStopped = true;
                 tasksQueue.Clear();
             }
         }
@@ -88,9 +84,12 @@ namespace HadesAIOCommon.Concurrent
 
         public void SubmitTask(Action action)
         {
-            var t = new HadesTask(this);
-            action += () => t.CompletedTaskCallback?.Invoke(t);
-            t.Task = new(action);
+            var t = new HadesTask(this)
+            {
+                //action += () => t.CompletedTaskCallback.Invoke(t);
+                Task = new(action)
+            };
+            t.Task.ContinueWith(_ => t.CompletedTaskCallback.Invoke(t));
             SubmitTask(t);
         }
         private void SubmitTask(HadesTask hadesTask)
@@ -101,25 +100,26 @@ namespace HadesAIOCommon.Concurrent
         public void MakeCompleteTask(HadesTask hadesTask)
         {
             hadesTask.IsDone = true;
-            completedTasks.Enqueue(hadesTask.Id);
+            completedTasks.Enqueue(hadesTask);
         }
 
         private void StartMonitoring()
         {
             Task.Run(async () =>
             {
-                while (tasksQueue.Count > 0 || runningTasks.Count > 0 || completedTasks.Count > 0)
+                while (tasksQueue.Count > 0 || runningTasks.Count > 0 || !completedTasks.IsEmpty)
                 {
-                    while (completedTasks.Count > 0)
+                    while (!completedTasks.IsEmpty)
                     {
-                        var success = completedTasks.TryDequeue(out string hadesTask);
-                        lock (MUTEX)
+                        var success = completedTasks.TryDequeue(out HadesTask hadesTask);
+                        lock (mutex)
                         {
                             var isSuccess = runningTasks.Remove(hadesTask);
                             if (!isSuccess)
                             {
                             }
                         }
+                        await Task.Delay(timeWait);
                     }
                     await Task.Delay(timeWait);
                 }
