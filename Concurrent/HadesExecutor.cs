@@ -9,15 +9,13 @@ namespace HadesAIOCommon.Concurrent
     public class HadesExecutor : IExecutor
     {
         public int MaxParallelism { get; set; }
-        public int DelayTask { get; set; } = 10;
+        public int DelayTask { get; set; } = 100;
         public bool IsCompleted => finished;
 
         private readonly object mutex = new();
         private readonly Queue<HadesTask> tasksQueue = new();
         private readonly HashSet<HadesTask> runningTasks = new();
         private readonly ConcurrentQueue<HadesTask> completedTasks = new();
-        //private readonly HashSet<string> runningTasks = new();
-        //private readonly ConcurrentQueue<string> completedTasks = new();
 
         private readonly int timeWait;
         private bool finished;
@@ -35,6 +33,16 @@ namespace HadesAIOCommon.Concurrent
         {
             MaxParallelism = maxParallelism;
             this.timeWait = timeWait;
+        }
+        public void Stop()
+        {
+            lock (mutex)
+            {
+                tasksQueue.Clear();
+            }
+        }
+        public void Abort()
+        {
         }
 
         public void Run()
@@ -54,42 +62,29 @@ namespace HadesAIOCommon.Concurrent
                     if (hadesTask.Task != null)
                     {
                         hadesTask.Task.Start();
-                        //_ = hadesTask.Task.ContinueWith(_ => hadesTask.CompletedTaskCallback?.Invoke(hadesTask));
-                        await Task.Delay(timeWait);
+                        _ = hadesTask.Task.ContinueWith(taskResult => hadesTask.CompletedTaskCallback?.Invoke(hadesTask));
+                        await Task.Delay(DelayTask);
                     }
-
                     while (runningTasks.Count == MaxParallelism)
                     {
                         await Task.Delay(timeWait);
+                        //Thread.Sleep(timeWait);
                     }
                 }
             });
 
             while (!finished)
             {
-                Thread.Sleep(timeWait);
+                Thread.Sleep(500);
             }
-        }
-
-        public void Stop()
-        {
-            lock (mutex)
-            {
-                tasksQueue.Clear();
-            }
-        }
-        public void Abort()
-        {
         }
 
         public void SubmitTask(Action action)
         {
             var t = new HadesTask(this)
             {
-                //action += () => t.CompletedTaskCallback.Invoke(t);
-                Task = new(action)
+                Task = new Task(action)
             };
-            t.Task.ContinueWith(_ => t.CompletedTaskCallback.Invoke(t));
             SubmitTask(t);
         }
         private void SubmitTask(HadesTask hadesTask)
@@ -111,15 +106,11 @@ namespace HadesAIOCommon.Concurrent
                 {
                     while (!completedTasks.IsEmpty)
                     {
-                        var success = completedTasks.TryDequeue(out HadesTask hadesTask);
+                        completedTasks.TryDequeue(out HadesTask hadesTask);
                         lock (mutex)
                         {
-                            var isSuccess = runningTasks.Remove(hadesTask);
-                            if (!isSuccess)
-                            {
-                            }
+                            runningTasks.Remove(hadesTask);
                         }
-                        await Task.Delay(timeWait);
                     }
                     await Task.Delay(timeWait);
                 }

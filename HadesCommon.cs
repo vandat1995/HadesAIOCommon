@@ -70,13 +70,28 @@ namespace HadesAIOCommon
         public static string Get2FACode(string salt)
         {
             salt = salt.Replace(" ", "");
-            var totp = new Totp(Base32Encoding.ToBytes(salt));
-            if (totp.RemainingSeconds() < 5)
+
+            try
             {
-                Thread.Sleep(5000);
-                return Get2FACode(salt);
+                var URL = $"https://2fa.live/tok/{salt}";
+                var resp = EzHttpRequest.Instance.Get(URL);
+                var token = GetValueByRegex(resp, "(\\d+)");
+                if (string.IsNullOrWhiteSpace(token) || !IsNumeric(token))
+                {
+                    throw new Exception();
+                }
+                return token;
             }
-            return totp.ComputeTotp();
+            catch
+            {
+                var totp = new Totp(Base32Encoding.ToBytes(salt));
+                if (totp.RemainingSeconds() < 5)
+                {
+                    Thread.Sleep(5000);
+                    return Get2FACode(salt);
+                }
+                return totp.ComputeTotp();
+            }
         }
 
         public static string GetRandomFullName()

@@ -5,7 +5,7 @@ namespace HadesAIOCommon.Concurrent
 {
     public class HadesTask
     {
-        public HadesTask(IExecutor executor)
+        public HadesTask(HadesExecutor executor)
         {
             CompletedTaskCallback = executor.MakeCompleteTask;
         }
