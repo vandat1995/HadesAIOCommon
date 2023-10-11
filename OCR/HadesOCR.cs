@@ -14,7 +14,7 @@ namespace HadesAIOCommon.OCR
         private const PageIteratorLevel pageIteratorLevel = PageIteratorLevel.Word;
 
 
-        private const int BITMAP_REDUCE_RATIO = 3;
+        private const int BITMAP_REDUCE_RATIO = 2;
         private const int MAX_CONCURRENT = 128;
         private static readonly Random rand = new();
         private static readonly List<object> mutexs = Enumerable.Repeat(new object(), MAX_CONCURRENT).ToList();
@@ -44,8 +44,7 @@ namespace HadesAIOCommon.OCR
         public static List<BoudingWord> GetBoudingWords(string imgPath, out string pageText)
         {
             using var bitmap = new Bitmap(imgPath);
-            using var newBitmap = new Bitmap(bitmap);
-            return GetBoudingWords(newBitmap, out pageText);
+            return GetBoudingWords(bitmap, out pageText);
         }
         private static List<BoudingWord> GetBoudingWords(Bitmap bitmap, out string pageText)
         {

@@ -5,6 +5,7 @@
         <LangVersion>10.0</LangVersion>
         <Nullable>enable</Nullable>
         <Platforms>AnyCPU;x64</Platforms>
+        <AssemblyName>AllCommon</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>
