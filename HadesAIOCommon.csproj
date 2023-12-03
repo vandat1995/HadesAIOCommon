@@ -20,7 +20,6 @@
 
     <ItemGroup>
       <Folder Include="Appium\" />
-      <Folder Include="Selenium\" />
     </ItemGroup>
 
 </Project>
