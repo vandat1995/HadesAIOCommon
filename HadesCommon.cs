@@ -235,10 +235,11 @@ namespace HadesAIOCommon
             {
             }
         }
-        public static IEnumerable<string> GetFilesInDirectory(string dir)
+        public static List<string> GetFilesInDirectory(string dir)
         {
             return Directory.GetFiles(dir)
-                .Where(x => !Path.GetFileName(x).StartsWith("."));
+                .Where(x => !Path.GetFileName(x).StartsWith("."))
+                .ToList();
         }
 
     }
