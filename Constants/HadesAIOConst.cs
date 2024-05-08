@@ -3,9 +3,9 @@ using System.IO;
 
 namespace HadesAIOCommon.Constants
 {
-    public static class HadesConstant
+    public static class HadesAIOConst
     {
-        static HadesConstant()
+        static HadesAIOConst()
         {
             Directory.CreateDirectory(OutputDir);
         }

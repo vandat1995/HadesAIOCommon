@@ -27,7 +27,7 @@ namespace HadesAIOCommon.Http
             request.IgnoreProtocolErrors = true;
             request.AllowAutoRedirect = true;
             request.ConnectTimeout = DEFAULT_TIMEOUT;
-            request.UserAgent = HadesConstant.DEFAULT_CHROME_USER_AGENT;
+            request.UserAgent = HadesAIOConst.DEFAULT_CHROME_USER_AGENT;
             if (timeout != 0)
             {
                 request.ConnectTimeout = timeout;
@@ -54,7 +54,7 @@ namespace HadesAIOCommon.Http
             Dictionary<string, string>? headers = null, string ua = "", bool redirect = false)
         {
             using var request = new HttpRequest();
-            request.UserAgent = !string.IsNullOrWhiteSpace(ua) ? ua : HadesConstant.DEFAULT_CHROME_USER_AGENT;
+            request.UserAgent = !string.IsNullOrWhiteSpace(ua) ? ua : HadesAIOConst.DEFAULT_CHROME_USER_AGENT;
             request.ConnectTimeout = timeout != 0 ? timeout : DEFAULT_TIMEOUT;
             request.AllowAutoRedirect = redirect;
             request.IgnoreProtocolErrors = ignoreError;
@@ -80,7 +80,7 @@ namespace HadesAIOCommon.Http
             request.IgnoreProtocolErrors = true;
             request.AllowAutoRedirect = true;
             request.ConnectTimeout = DEFAULT_TIMEOUT;
-            request.UserAgent = HadesConstant.DEFAULT_CHROME_USER_AGENT;
+            request.UserAgent = HadesAIOConst.DEFAULT_CHROME_USER_AGENT;
             if (proxy != null)
             {
                 request.Proxy = proxy;
@@ -94,7 +94,7 @@ namespace HadesAIOCommon.Http
             using var request = new HttpRequest();
             request.AllowAutoRedirect = true;
             request.ConnectTimeout = DEFAULT_TIMEOUT;
-            request.UserAgent = HadesConstant.DEFAULT_CHROME_USER_AGENT;
+            request.UserAgent = HadesAIOConst.DEFAULT_CHROME_USER_AGENT;
             return request.Post(URL).ToString();
         }
         public string Post(string url, string body, string contentType,
@@ -105,7 +105,7 @@ namespace HadesAIOCommon.Http
             request.IgnoreProtocolErrors = ignoreError;
             request.AllowAutoRedirect = true;
             request.ConnectTimeout = DEFAULT_TIMEOUT;
-            request.UserAgent = ua != string.Empty ? ua : HadesConstant.DEFAULT_CHROME_USER_AGENT;
+            request.UserAgent = ua != string.Empty ? ua : HadesAIOConst.DEFAULT_CHROME_USER_AGENT;
             if (proxy != null)
             {
                 request.Proxy = proxy;
@@ -126,7 +126,7 @@ namespace HadesAIOCommon.Http
             using var request = new HttpRequest();
             request.IgnoreProtocolErrors = true;
             request.AllowAutoRedirect = true;
-            request.UserAgent = ua != string.Empty ? ua : HadesConstant.DEFAULT_CHROME_USER_AGENT;
+            request.UserAgent = ua != string.Empty ? ua : HadesAIOConst.DEFAULT_CHROME_USER_AGENT;
             if (proxy != null)
             {
                 request.Proxy = proxy;
@@ -151,7 +151,7 @@ namespace HadesAIOCommon.Http
             using var request = new HttpRequest();
             request.IgnoreProtocolErrors = true;
             request.ConnectTimeout = 1000 * 60 * 5;
-            request.UserAgent = ua != string.Empty ? ua : HadesConstant.DEFAULT_CHROME_USER_AGENT;
+            request.UserAgent = ua != string.Empty ? ua : HadesAIOConst.DEFAULT_CHROME_USER_AGENT;
             request.Get(url).ToFile(localPath);
         }
 

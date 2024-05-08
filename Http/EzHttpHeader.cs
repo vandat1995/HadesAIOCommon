@@ -1,16 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace HadesAIOCommon.Http
 {
     public class EzHttpHeader
     {
-        private readonly Dictionary<string, string> headers = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> headers = new();
 
         public EzHttpHeader()
         {
-            Add("Upgrade-Insecure-Requests", "1");
+            //Add("Upgrade-Insecure-Requests", "1");
+        }
+
+        public EzHttpHeader(Dictionary<string, string> others): this()
+        {
+            foreach (var item in others)
+            {
+                headers[item.Key] = item.Value;
+            }
         }
 
         public EzHttpHeader UserAgent(string userAgent)
