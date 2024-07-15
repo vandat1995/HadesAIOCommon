@@ -27,7 +27,7 @@ namespace HadesAIOCommon.Caching
             {
                 return;
             }
-            CacheData cacheData = new CacheData(key, value);
+            CacheData cacheData = new (key, value);
             if (ttl > 0)
             {
                 cacheData.expires = cacheData.time.AddMinutes(ttl);

@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using OtpNet;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -42,7 +43,22 @@ namespace HadesAIOCommon
             bool s2 = ThreadPool.SetMinThreads(minT, 3200);
             return s1 && s2;
         }
-
+        public static string RunCmd(string cmd)
+        {
+            string output = "";
+            using (Process cmdProcess = new())
+            {
+                cmdProcess.StartInfo.FileName = "cmd.exe";
+                cmdProcess.StartInfo.Arguments = "/c " + cmd;
+                cmdProcess.StartInfo.RedirectStandardOutput = true;
+                cmdProcess.StartInfo.UseShellExecute = false;
+                cmdProcess.StartInfo.CreateNoWindow = true;
+                cmdProcess.Start();
+                output = cmdProcess.StandardOutput.ReadToEnd();
+                cmdProcess.WaitForExit();
+            }
+            return output;
+        }
 
         public static Bitmap Base64ToBitmap(string base64)
         {
