@@ -6,15 +6,13 @@ using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MailKit.Net.Proxy;
 
 namespace HadesAIOCommon.Mail
 {
     public class ImapReader : IEmailReader
     {
-        private const string AuthFailedMsg = "authentication failed, login failed";
+        //private const string AuthFailedMsg = "authentication failed, login failed";
         private const int ImapSslPort = 993;
         public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(60);
         public string? Proxy { get; set; }
