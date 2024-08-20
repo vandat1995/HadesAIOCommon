@@ -67,7 +67,7 @@ namespace HadesAIOCommon.FTP
             return directoryList;
         }
 
-        public void Download(string remoteFile, string localFile)
+        public void Download(string remoteFile, string localFile, bool shouldDeleteWhenDownloaded = false)
         {
             try
             {
@@ -75,6 +75,10 @@ namespace HadesAIOCommon.FTP
                 using var webClient = new WebClient();
                 webClient.Credentials = credential;
                 webClient.DownloadFile(remotePath, localFile);
+                if (shouldDeleteWhenDownloaded)
+                {
+                    Delete(remoteFile);
+                }
             }
             catch (Exception e)
             {
