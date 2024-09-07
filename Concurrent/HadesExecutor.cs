@@ -75,7 +75,7 @@ namespace HadesAIOCommon.Concurrent
 
             while (!finished)
             {
-                Thread.Sleep(500);
+                Task.Delay(500).Wait();
             }
         }
 

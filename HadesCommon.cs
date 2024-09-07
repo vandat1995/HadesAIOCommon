@@ -1,6 +1,5 @@
 ﻿using HadesAIOCommon.Http;
 using Leaf.xNet;
-using Newtonsoft.Json.Linq;
 using OtpNet;
 using System;
 using System.Collections.Generic;
@@ -9,9 +8,9 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace HadesAIOCommon
 {
@@ -26,7 +25,7 @@ namespace HadesAIOCommon
 
         public static void Delay(int seconds)
         {
-            Thread.Sleep(1000 * seconds);
+            Task.Delay(1000 * seconds).Wait();
         }
         public static void Delay(int min, int max)
         {
@@ -103,7 +102,7 @@ namespace HadesAIOCommon
                 var totp = new Totp(Base32Encoding.ToBytes(salt));
                 if (totp.RemainingSeconds() < 5)
                 {
-                    Thread.Sleep(5000);
+                    Delay(5);
                     return Get2FACode(salt);
                 }
                 return totp.ComputeTotp();

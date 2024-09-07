@@ -25,6 +25,7 @@ namespace HadesAIOCommon.FTP
         public IList<string> ListFiles(string directory)
         {
             /* Create an FTP Request */
+            directory = directory.TrimStart('/');
             FtpWebRequest ftpRequest = (FtpWebRequest)FtpWebRequest.Create(address + "/" + directory);
             ftpRequest.Credentials = credential;
             ftpRequest.UseBinary = true;
@@ -34,8 +35,8 @@ namespace HadesAIOCommon.FTP
             ftpRequest.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
             FtpWebResponse ftpResponse = (FtpWebResponse)ftpRequest.GetResponse();
             Stream ftpStream = ftpResponse.GetResponseStream();
-            StreamReader ftpReader = new StreamReader(ftpStream, Encoding.UTF8);
-            List<string> lines = new List<string>();
+            StreamReader ftpReader = new(ftpStream, Encoding.UTF8);
+            List<string> lines = new();
             string l;
             while ((l = ftpReader.ReadLine()) != null)
             {

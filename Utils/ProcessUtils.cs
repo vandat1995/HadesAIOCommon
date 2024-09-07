@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace HadesAIOCommon.Utils
 {
@@ -21,7 +22,7 @@ namespace HadesAIOCommon.Utils
                 {
                     return proc;
                 }
-                Thread.Sleep(1000);
+                Task.Delay(1000).Wait();
             }
             return null;
         }
