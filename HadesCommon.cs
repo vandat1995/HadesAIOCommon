@@ -37,9 +37,9 @@ namespace HadesAIOCommon
         }
         public static bool SetThreadPool(int n)
         {
-            bool s1 = ThreadPool.SetMaxThreads(1600, 3200);
             int minT = n + Environment.ProcessorCount;
-            bool s2 = ThreadPool.SetMinThreads(minT, 3200);
+            bool s1 = ThreadPool.SetMaxThreads(500, 1000);
+            bool s2 = ThreadPool.SetMinThreads(minT, 1000);
             return s1 && s2;
         }
         public static string RunCmd(string cmd)

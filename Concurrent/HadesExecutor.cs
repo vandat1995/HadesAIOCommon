@@ -22,7 +22,7 @@ namespace HadesAIOCommon.Concurrent
 
         public HadesExecutor()
         {
-            timeWait = 20;
+            timeWait = 100;
             MaxParallelism = Environment.ProcessorCount - 1;
         }
         public HadesExecutor(int maxParallelism) : this()
@@ -68,7 +68,6 @@ namespace HadesAIOCommon.Concurrent
                     while (runningTasks.Count == MaxParallelism)
                     {
                         await Task.Delay(timeWait);
-                        //Thread.Sleep(timeWait);
                     }
                 }
             });
