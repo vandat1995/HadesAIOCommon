@@ -51,7 +51,7 @@ namespace HadesAIOCommon.Caching
             {
                 if (defaultValue != null)
                 {
-                    return (T)defaultValue;
+                    return JSON.Parse<T>(defaultValue);
                 }
                 return default;
             }

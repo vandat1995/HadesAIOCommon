@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -32,6 +33,21 @@ namespace HadesAIOCommon.Utils
             {
                 // ignored
             }
+        }
+        public static void DeleteDirectory(string pathToDir)
+        {
+            try
+            {
+                if (!Directory.Exists(pathToDir)) return;
+                Directory.Delete(pathToDir, true);
+            }
+            catch
+            {
+            }
+        }
+        public static void OpenDirectory (string pathToDir)
+        {
+            Process.Start("explorer.exe", pathToDir);
         }
 
         public static void ExtractZipFile(string zipFilePath, string extractPath)
